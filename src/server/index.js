@@ -84,8 +84,25 @@ Object.entries(models).forEach(([key, Model]) => {
       const newItem = new Model(req.body);
       const savedItem = await newItem.save();
       
-      // Real-time sync: Notify all clients in the same shop
+      // Automatic Audit Log
+      const userId = req.headers['x-user-id'] || 'system';
+      const userName = req.headers['x-user-name'] || 'System';
       const shopId = req.body.shopId;
+
+      if (key !== 'activityLogs') {
+        const log = new ActivityLog({
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+          shopId,
+          userId,
+          userName,
+          action: `Created ${key}`,
+          details: `Added new ${key.slice(0, -1)}: ${savedItem.id}`,
+          createdAt: new Date().toISOString()
+        });
+        await log.save();
+      }
+      
+      // Real-time sync
       if (shopId) {
         io.to(shopId).emit('data-updated', { key, type: 'create', id: savedItem.id });
       }
@@ -106,8 +123,25 @@ Object.entries(models).forEach(([key, Model]) => {
       );
       if (!updatedItem) return res.status(404).json({ error: 'Item not found' });
 
-      // Real-time sync: Notify all clients in the same shop
+      // Automatic Audit Log
+      const userId = req.headers['x-user-id'] || 'system';
+      const userName = req.headers['x-user-name'] || 'System';
       const shopId = req.body.shopId || updatedItem.shopId;
+
+      if (key !== 'activityLogs') {
+        const log = new ActivityLog({
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+          shopId,
+          userId,
+          userName,
+          action: `Updated ${key}`,
+          details: `Modified ${key.slice(0, -1)}: ${req.params.id}`,
+          createdAt: new Date().toISOString()
+        });
+        await log.save();
+      }
+
+      // Real-time sync
       if (key === 'system_settings') {
         io.emit('system-update', updatedItem);
       } else if (shopId) {
@@ -126,8 +160,25 @@ Object.entries(models).forEach(([key, Model]) => {
       const deletedItem = await Model.findOneAndDelete({ id: req.params.id });
       if (!deletedItem) return res.status(404).json({ error: 'Item not found' });
 
-      // Real-time sync: Notify all clients in the same shop
+      // Automatic Audit Log
+      const userId = req.headers['x-user-id'] || 'system';
+      const userName = req.headers['x-user-name'] || 'System';
       const shopId = deletedItem.shopId;
+
+      if (key !== 'activityLogs') {
+        const log = new ActivityLog({
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+          shopId,
+          userId,
+          userName,
+          action: `Deleted ${key}`,
+          details: `Removed ${key.slice(0, -1)}: ${req.params.id}`,
+          createdAt: new Date().toISOString()
+        });
+        await log.save();
+      }
+
+      // Real-time sync
       if (shopId) {
         io.to(shopId).emit('data-updated', { key, type: 'delete', id: req.params.id });
       }

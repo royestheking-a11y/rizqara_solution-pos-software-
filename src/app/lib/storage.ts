@@ -48,6 +48,25 @@ function setAll<T>(key: string, items: T[]): void {
   localStorage.setItem(`rizqara_${key}`, JSON.stringify(items));
 }
 
+function getAuthHeaders() {
+  try {
+    const saved = localStorage.getItem('rizqara_auth_session');
+    if (!saved) return {};
+    const { userId } = JSON.parse(saved);
+    const usersData = localStorage.getItem('rizqara_users');
+    if (!usersData) return {};
+    const users = JSON.parse(usersData);
+    const user = users.find((u: any) => u.id === userId);
+    if (!user) return {};
+    return {
+      'x-user-id': user.id,
+      'x-user-name': user.name
+    };
+  } catch {
+    return {};
+  }
+}
+
 // API Helpers
 async function apiGet<T>(key: string): Promise<T[]> {
   try {
@@ -63,7 +82,10 @@ async function apiPost<T>(key: string, data: any): Promise<T | null> {
   try {
     const res = await fetch(`${API_BASE}/${key}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
       body: JSON.stringify(data)
     });
     if (!res.ok) throw new Error('Post failed');
@@ -79,7 +101,10 @@ async function apiPut<T>(key: string, id: string, data: any): Promise<T | null> 
   try {
     const res = await fetch(`${API_BASE}/${key}/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
       body: JSON.stringify(data)
     });
     if (!res.ok) throw new Error('Put failed');
@@ -93,7 +118,10 @@ async function apiPut<T>(key: string, id: string, data: any): Promise<T | null> 
 
 async function apiDelete(key: string, id: string): Promise<void> {
   try {
-    const res = await fetch(`${API_BASE}/${key}/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_BASE}/${key}/${id}`, { 
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
     if (!res.ok) throw new Error('Delete failed');
   } catch (err) {
     console.warn(`Delete failed for ${key}/${id}, adding to queue:`, err);
