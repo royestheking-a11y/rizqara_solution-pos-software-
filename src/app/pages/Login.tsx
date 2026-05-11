@@ -3,9 +3,15 @@ import { useNavigate, Link } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import {
   Eye, EyeOff, ShieldCheck, Store, Lock, Users,
-  Zap, ArrowRight, CheckCircle,
-  ShoppingBag
+  BarChart3, Package, Zap, ArrowRight, CheckCircle,
+  ShoppingCart, TrendingUp, Globe, Star, ShoppingBag
 } from 'lucide-react';
+
+const TESTIMONIALS = [
+  { text: '"Rizqara transformed our retail operations. Sales tracking is now effortless."', author: 'Maxwear, Dhaka' },
+  { text: '"Best POS software for Bangladeshi businesses. Supports bKash, Nagad out of the box."', author: 'Maxwear Fashion House' },
+  { text: '"The inventory alerts alone saved us from stockouts multiple times."', author: 'City Electronics, CTG' },
+];
 
 /* ─── Premium Splash Screen ─── */
 function SplashScreen({ onDone }: { onDone: () => void }) {
@@ -54,6 +60,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
@@ -62,6 +69,13 @@ export default function Login() {
       else navigate('/shop');
     }
   }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTestimonial(prev => (prev + 1) % TESTIMONIALS.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,6 +165,32 @@ export default function Login() {
                 Elevate your business with our enterprise-grade POS system. 
                 Seamlessly manage inventory, sales, and analytics with ease.
               </p>
+            </div>
+
+            {/* Testimonial rotator */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-8">
+              <div className="flex gap-1 mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={12} className="text-[#D4A853] fill-[#D4A853]" />
+                ))}
+              </div>
+              <div className="transition-all duration-500 min-h-[80px]">
+                <p className="text-slate-300 text-sm leading-relaxed mb-3 font-medium">
+                  {TESTIMONIALS[activeTestimonial].text}
+                </p>
+                <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest">
+                  {TESTIMONIALS[activeTestimonial].author}
+                </p>
+              </div>
+              <div className="flex gap-1.5 mt-4">
+                {TESTIMONIALS.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveTestimonial(i)}
+                    className={`h-1 rounded-full transition-all duration-300 ${i === activeTestimonial ? 'bg-indigo-500 w-8' : 'bg-white/10 w-2'}`}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Footer */}
