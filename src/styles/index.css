@@ -1,0 +1,109 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+ 
+ .print-container {
+   display: none;
+ }
+
+/* Print styles for POS thermal receipts and A4 invoices */
+@media print {
+  /* Ensure backgrounds are printed if the user allows */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    margin: 10mm;
+    size: auto;
+  }
+  
+  /* Hide everything except the print container */
+  body > *:not(.print-container) {
+    display: none !important;
+  }
+
+  /* Force display of the print container */
+  .print-container {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    z-index: 9999;
+    background: white !important;
+  }
+
+  /* Thermal Receipt Specifics */
+  #invoice-print {
+    display: block !important;
+    visibility: visible !important;
+    width: 80mm;
+    background: white !important;
+    color: black !important;
+    padding: 2mm;
+    margin: 0 auto;
+  }
+  #invoice-print * {
+    visibility: visible !important;
+  }
+
+  /* Retail Invoice Specifics */
+  #retail-invoice-print {
+    display: block !important;
+    visibility: visible !important;
+    width: 210mm;
+    background: white !important;
+    color: black !important;
+    margin: 0 auto;
+  }
+  #retail-invoice-print * {
+    visibility: visible !important;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #f8f8f8;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2563EB;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth transition for sidebar */
+aside {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Premium selection style */
+::selection {
+  background: #2563EB22;
+  color: #1D4ED8;
+}
+
+/* Animate in utility */
+@keyframes slideInFromTop {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in {
+  animation: slideInFromTop 0.2s ease-out;
+}
