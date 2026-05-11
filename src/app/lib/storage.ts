@@ -29,6 +29,7 @@ const KEYS = {
   SYSTEM_SETTINGS: 'system_settings',
   INVOICE_COUNTER: 'invoice_counter',
   INITIALIZED: 'initialized',
+  SYNC_QUEUE: 'sync_queue',
 };
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -58,26 +59,156 @@ async function apiGet<T>(key: string): Promise<T[]> {
   }
 }
 
-async function apiPost<T>(key: string, data: any): Promise<T> {
-  const res = await fetch(`${API_BASE}/${key}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  return await res.json();
+async function apiPost<T>(key: string, data: any): Promise<T | null> {
+  try {
+    const res = await fetch(`${API_BASE}/${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Post failed');
+    return await res.json();
+  } catch (err) {
+    console.warn(`Post failed for ${key}, adding to queue:`, err);
+    addToSyncQueue('POST', key, data);
+    return null;
+  }
 }
 
-async function apiPut<T>(key: string, id: string, data: any): Promise<T> {
-  const res = await fetch(`${API_BASE}/${key}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  return await res.json();
+async function apiPut<T>(key: string, id: string, data: any): Promise<T | null> {
+  try {
+    const res = await fetch(`${API_BASE}/${key}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Put failed');
+    return await res.json();
+  } catch (err) {
+    console.warn(`Put failed for ${key}/${id}, adding to queue:`, err);
+    addToSyncQueue('PUT', key, data);
+    return null;
+  }
 }
 
 async function apiDelete(key: string, id: string): Promise<void> {
-  await fetch(`${API_BASE}/${key}/${id}`, { method: 'DELETE' });
+  try {
+    const res = await fetch(`${API_BASE}/${key}/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Delete failed');
+  } catch (err) {
+    console.warn(`Delete failed for ${key}/${id}, adding to queue:`, err);
+    addToSyncQueue('DELETE', key, { id });
+  }
+}
+
+// ===================== SYNC QUEUE LOGIC =====================
+interface SyncItem {
+  id: string;
+  method: 'POST' | 'PUT' | 'DELETE';
+  key: string;
+  data: any;
+  timestamp: string;
+}
+
+function getSyncQueue(): SyncItem[] {
+  try {
+    const data = localStorage.getItem(`rizqara_${KEYS.SYNC_QUEUE}`);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+
+function setSyncQueue(queue: SyncItem[]): void {
+  localStorage.setItem(`rizqara_${KEYS.SYNC_QUEUE}`, JSON.stringify(queue));
+}
+
+function addToSyncQueue(method: 'POST' | 'PUT' | 'DELETE', key: string, data: any) {
+  const queue = getSyncQueue();
+  // For PUT/DELETE, if there's already a pending operation for the same ID, update it or keep the latest
+  if (method === 'PUT' || method === 'DELETE') {
+    const existingIdx = queue.findIndex(item => item.key === key && item.data.id === data.id);
+    if (existingIdx >= 0) {
+      // If we are deleting something that was pending an update, just delete it
+      if (method === 'DELETE') {
+        queue[existingIdx] = { id: generateId(), method, key, data, timestamp: new Date().toISOString() };
+      } else {
+        // Update existing pending data
+        queue[existingIdx].data = { ...queue[existingIdx].data, ...data };
+      }
+      setSyncQueue(queue);
+      return;
+    }
+  }
+  
+  queue.push({ id: generateId(), method, key, data, timestamp: new Date().toISOString() });
+  setSyncQueue(queue);
+  
+  // Try processing immediately if online
+  if (navigator.onLine) {
+    processSyncQueue();
+  }
+}
+
+let isProcessingQueue = false;
+export async function processSyncQueue() {
+  if (isProcessingQueue || !navigator.onLine) return;
+  
+  const queue = getSyncQueue();
+  if (queue.length === 0) return;
+  
+  isProcessingQueue = true;
+  console.log(`Processing sync queue: ${queue.length} items...`);
+  
+  const remainingQueue: SyncItem[] = [];
+  
+  for (const item of queue) {
+    try {
+      let res;
+      if (item.method === 'POST') {
+        res = await fetch(`${API_BASE}/${item.key}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item.data)
+        });
+      } else if (item.method === 'PUT') {
+        res = await fetch(`${API_BASE}/${item.key}/${item.data.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item.data)
+        });
+      } else if (item.method === 'DELETE') {
+        res = await fetch(`${API_BASE}/${item.key}/${item.data.id}`, {
+          method: 'DELETE'
+        });
+      }
+      
+      if (!res?.ok) {
+        console.error(`Failed to sync item ${item.id}, keeping in queue.`);
+        remainingQueue.push(item);
+      }
+    } catch (err) {
+      console.error(`Network error syncing item ${item.id}, keeping in queue.`, err);
+      remainingQueue.push(item);
+      // Stop processing for now if it's a network error
+      break;
+    }
+  }
+  
+  setSyncQueue(remainingQueue);
+  isProcessingQueue = false;
+  console.log(`Sync queue processing finished. ${remainingQueue.length} items remaining.`);
+}
+
+// Global Online Listener
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    console.log('Internet back! Starting sync...');
+    processSyncQueue();
+  });
+  
+  // Also check periodically
+  setInterval(processSyncQueue, 60000); // Every minute
 }
 
 // Global Sync
