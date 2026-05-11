@@ -108,7 +108,9 @@ Object.entries(models).forEach(([key, Model]) => {
 
       // Real-time sync: Notify all clients in the same shop
       const shopId = req.body.shopId || updatedItem.shopId;
-      if (shopId) {
+      if (key === 'system_settings') {
+        io.emit('system-update', updatedItem);
+      } else if (shopId) {
         io.to(shopId).emit('data-updated', { key, type: 'update', id: req.params.id });
       }
 

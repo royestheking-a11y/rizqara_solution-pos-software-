@@ -45,15 +45,27 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     newSocket.on('data-updated', async ({ key, type, id }) => {
       console.log(`Real-time update: ${key} ${type} ${id}`);
-      // Only sync if the event was NOT from us (though we rely on the server room logic)
       await syncWithMongoDB(key);
       
-      // Notify user
       if (type === 'create' && key === 'sales') {
         toast.info('New sale recorded by another staff member');
       } else if (key === 'products') {
         toast.info('Inventory updated by another device');
       }
+    });
+
+    newSocket.on('system-update', async (settings) => {
+      console.log('System settings updated globally');
+      await syncWithMongoDB('system_settings');
+      
+      if (settings.maintenanceMode) {
+        toast.error('System is entering maintenance mode...', { duration: 5000 });
+      } else {
+        toast.success('Maintenance complete. System is back online!');
+      }
+      
+      // Force a small delay then refresh to trigger guards
+      setTimeout(() => window.location.reload(), 2000);
     });
 
     setSocket(newSocket);

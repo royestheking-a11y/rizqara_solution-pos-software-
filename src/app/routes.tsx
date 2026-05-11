@@ -1,6 +1,8 @@
 import React from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import { useAuth } from './context/AuthContext';
+import { systemSettingsStorage } from './lib/storage';
+import MaintenanceMode from './components/ui/MaintenanceMode';
 
 // Pages
 import Login from './pages/Login';
@@ -52,6 +54,12 @@ function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
 
 function RequireShop({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuth();
+  const settings = systemSettingsStorage.get();
+
+  if (settings.maintenanceMode && user?.role !== 'super_admin') {
+    return <MaintenanceMode />;
+  }
+
   if (!isAuthenticated) return <Navigate to="/" replace />;
   if (user?.role === 'super_admin') return <Navigate to="/super-admin" replace />;
   return <>{children}</>;

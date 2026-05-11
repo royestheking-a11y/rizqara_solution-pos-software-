@@ -4,8 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import {
   Eye, EyeOff, ShieldCheck, Store, Lock, Users,
   BarChart3, Package, Zap, ArrowRight, CheckCircle,
-  ShoppingCart, TrendingUp, Globe, Star, ShoppingBag
+  ShoppingCart, TrendingUp, Globe, Star, ShoppingBag, AlertTriangle
 } from 'lucide-react';
+import { systemSettingsStorage } from '../lib/storage';
 
 const TESTIMONIALS = [
   { text: '"Rizqara transformed our retail operations. Sales tracking is now effortless."', author: 'Maxwear, Dhaka' },
@@ -221,6 +222,17 @@ export default function Login() {
           </div>
 
           <div className="flex-1 flex flex-col justify-center px-8 sm:px-12 lg:px-16 xl:px-20 py-10 max-w-xl mx-auto w-full">
+            {systemSettingsStorage.get().maintenanceMode && (
+              <div className="mb-6 flex items-center gap-3 p-3.5 bg-orange-50 border border-orange-100 rounded-2xl animate-pulse">
+                <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle size={20} className="text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-orange-800 font-bold uppercase tracking-tight">System Maintenance</p>
+                  <p className="text-[10px] text-orange-600">Only Super Admins can access the platform currently.</p>
+                </div>
+              </div>
+            )}
             {/* Welcome header */}
             <div className="mb-10">
               <div className="flex items-center gap-2 mb-5">
