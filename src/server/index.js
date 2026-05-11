@@ -120,4 +120,22 @@ app.get('/api/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  
+  // Self-ping logic for Render (prevents sleep)
+  const RENDER_URL = process.env.RENDER_EXTERNAL_URL;
+  if (RENDER_URL) {
+    console.log(`Self-pinging enabled for: ${RENDER_URL}`);
+    setInterval(() => {
+      const url = `${RENDER_URL}/api/health`;
+      const protocol = url.startsWith('https') ? import('https') : import('http');
+      
+      protocol.then(mod => {
+        mod.get(url, (res) => {
+          console.log(`Self-ping status: ${res.statusCode}`);
+        }).on('error', (err) => {
+          console.error(`Self-ping error: ${err.message}`);
+        });
+      });
+    }, 10 * 60 * 1000); // Every 10 minutes
+  }
 });
