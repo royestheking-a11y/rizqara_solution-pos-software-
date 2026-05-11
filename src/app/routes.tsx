@@ -57,13 +57,6 @@ function RequireShop({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function RootRedirect() {
-  const { isAuthenticated, user } = useAuth();
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user?.role === 'super_admin') return <Navigate to="/super-admin" replace />;
-  return <Navigate to="/shop" replace />;
-}
-
 export const router = createBrowserRouter([
   {
     path: '/',
