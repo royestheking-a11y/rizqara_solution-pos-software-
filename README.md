@@ -1,62 +1,105 @@
-# 🚀 Rizqara Solution - Premium POS System
+# 🚀 Rizqara Solution - Enterprise POS System
 
-**Rizqara Solution** is a state-of-the-art, cloud-integrated Point of Sale (POS) software designed for modern retail businesses. It is a flagship product of **Rizqara Tech**, built to streamline sales, inventory management, and business analytics.
+**Rizqara Solution** is a professional-grade, offline-first Point of Sale (POS) ecosystem designed for high-standard retail operations. Built by **Rizqara Tech**, it combines the reliability of local software with the power of cloud synchronization.
 
-## 🌟 Key Features
-- **Cloud-Synced Architecture**: Powered by **MongoDB**, ensuring your data is accessible from anywhere while maintaining local speed.
-- **Smart Inventory Management**: Track products, variants (size/color), and low-stock alerts in real-time.
-- **Advanced POS Interface**: Optimized for speed with barcode support, invoice generation, and WhatsApp integration.
-- **Comprehensive Reporting**: Daily, monthly, and yearly reports for revenue, profit, and expenses.
-- **Multi-tenant Support**: Manage multiple shops under a single platform with tiered subscription packages.
-- **Customer Loyalty System**: Built-in point-based loyalty rewards to keep your customers coming back.
-- **Staff Management**: Role-based access control for Owners, Managers, and Cashiers.
+---
+
+## 🌟 Enterprise Features
+
+### 📶 Offline-First & PWA
+- **Work Anywhere**: Full functionality even without an active internet connection.
+- **Background Sync**: Automatic outbox-based synchronization when back online.
+- **Installable App**: Progressive Web App (PWA) support for desktop and mobile installation.
+- **Smart Caching**: Service worker integration ensures zero-downtime reloads.
+
+### 🇧🇩 Multi-Language Support
+- **Full Localization**: Seamlessly switch between **English** and **Bengali (বাংলা)**.
+- **Native Experience**: Interface tailored for local shopkeepers and staff.
+- **Dynamic Translation**: Instant UI updates across all modules without page refresh.
+
+### ⚡ Real-Time Synchronization
+- **Live Inventory**: Instant stock updates across all connected cash registers via **Socket.io**.
+- **Collaborative Sales**: Cashiers see new sales and invoices from colleagues in real-time.
+- **Global Updates**: System-wide notifications and maintenance alerts pushed instantly.
+
+### 🛡️ Security & Reliability
+- **Data Protection**: 256-bit SSL encryption and GDPR-compliant data handling.
+- **Encrypted Storage**: Sensitive business data is encrypted at rest and in transit.
+- **Production Hardening**: Self-ping architecture to ensure 100% backend uptime on cloud providers.
+- **Maintenance Mode**: Global toggle for Super Admins to lock the system for essential updates.
+
+### 📊 Business Intelligence
+- **Deep Analytics**: Real-time revenue, profit, and expense visualization.
+- **Recent Transactions**: Live feed of sales activity with status tracking.
+- **Multi-Tenant Architecture**: Manage hundreds of independent shops with tiered subscription control.
+
+---
 
 ## 🛠️ Technology Stack
-- **Frontend**: React.js with TypeScript & Tailwind CSS
-- **Backend**: Node.js & Express.js (ES Modules)
-- **Database**: MongoDB Atlas (Primary Cloud Storage)
-- **State Management**: Optimized Local-First with Hybrid Cloud Sync
+
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Real-Time**: Socket.io (WebSockets)
+- **Offline**: VitePWA, LocalStorage Outbox Sync
+- **Backend**: Node.js, Express (ES Modules)
+- **Database**: MongoDB Atlas
 - **Icons**: Lucide React
+- **Notifications**: Sonner (Rich Toast System)
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- MongoDB Connection String
+- Node.js (v18+)
+- MongoDB Atlas Account
+- Git
 
 ### Installation
-1. Install dependencies:
+
+1. **Clone & Install**
    ```bash
+   git clone https://github.com/royestheking-a11y/rizqara_solution-pos-software-.git
+   cd rizqara_solution-pos-software-
    npm install
    ```
 
-2. Set up environment variables:
-   Create a `.env` file in the root and add:
+2. **Environment Configuration**
+   Create a `.env` file:
    ```env
-   MONGODB_URI=your_mongodb_connection_string
+   MONGODB_URI=your_connection_string
    PORT=5001
+   VITE_API_URL=http://localhost:5001
    ```
 
-3. Seed the database (Optional - for demo data):
+3. **Database Initialization**
    ```bash
+   # Seed production-ready demo data (MAXWEAR)
    node src/server/seed.js
    ```
 
-### Running the App
-Start the backend server:
-```bash
-npm run server
-```
+### Execution
 
-Start the frontend development server:
+**Developer Mode:**
 ```bash
+# Terminal 1: Backend
+npm run server
+
+# Terminal 2: Frontend
 npm run dev
 ```
 
-The app will be available at `http://localhost:5180`.
-
-## 🏢 About Rizqara Tech
-Rizqara Tech is committed to providing high-standard digital solutions for businesses. **Rizqara Solution** represents our dedication to quality, efficiency, and modern engineering.
+**Production Build:**
+```bash
+npm run build
+npm run preview
+```
 
 ---
-© 2026 **Rizqara Tech**. All Rights Reserved.
+
+## 🏢 About Rizqara Tech
+Rizqara Tech is an Advanced Agentic Coding firm specializing in premium digital transformations. We build software that doesn't just work—it excels.
+
+---
+
+© 2026 **Rizqara Tech**. All Rights Reserved.  
+*Precision Engineered for Modern Commerce.*
