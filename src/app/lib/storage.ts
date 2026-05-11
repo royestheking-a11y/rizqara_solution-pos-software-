@@ -212,15 +212,21 @@ if (typeof window !== 'undefined') {
 }
 
 // Global Sync
-export async function syncWithMongoDB() {
+export async function syncWithMongoDB(specificKey?: string) {
   const isMigrated = localStorage.getItem('rizqara_mongo_migrated') === 'true';
   if (!isMigrated) {
     console.log('Skipping sync: migration not yet complete.');
     return;
   }
 
-  console.log('Syncing with MongoDB...');
-  const collections = Object.values(KEYS).filter(k => k !== 'invoice_counter' && k !== 'initialized');
+  console.log(specificKey ? `Partial sync: ${specificKey}...` : 'Full sync with MongoDB...');
+  const collections = specificKey 
+    ? [specificKey] 
+    : Object.values(KEYS).filter(k => 
+        k !== KEYS.INVOICE_COUNTER && 
+        k !== KEYS.INITIALIZED && 
+        k !== KEYS.SYNC_QUEUE
+      );
   
   for (const key of collections) {
     try {
@@ -228,7 +234,7 @@ export async function syncWithMongoDB() {
       if (remoteData && Array.isArray(remoteData)) {
         // Safety check: Don't wipe local data if remote is empty and we have local items
         const localData = getAll(key);
-        if (remoteData.length === 0 && localData.length > 0) {
+        if (remoteData.length === 0 && localData.length > 0 && !specificKey) {
           console.log(`Skipping sync for ${key}: remote is empty but local has ${localData.length} items.`);
           continue;
         }
@@ -238,7 +244,7 @@ export async function syncWithMongoDB() {
       console.error(`Sync failed for ${key}:`, err);
     }
   }
-  console.log('Sync complete');
+  console.log(specificKey ? `Partial sync for ${specificKey} complete.` : 'Sync complete');
 }
 
 function generateId(): string {

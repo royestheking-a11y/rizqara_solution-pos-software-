@@ -13,6 +13,7 @@ import {
   ArrowRight, ShoppingCart, Package, Users, Zap, ArrowUpRight, ArrowDownRight,
   Clock, BarChart3
 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const COLORS = ['#2563EB', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899', '#06B6D4'];
 
@@ -65,6 +66,7 @@ function KPICard({ title, value, subtitle, icon, trend, color, link }: StatCardP
 
 export default function ShopDashboard() {
   const { shop, user } = useAuth();
+  const { t, language } = useLanguage();
   const shopId = shop?.id || '';
   const [chartDays, setChartDays] = useState<7 | 14 | 30>(7);
 
@@ -101,6 +103,11 @@ export default function ShopDashboard() {
 
   const greeting = () => {
     const h = new Date().getHours();
+    if (language === 'bn') {
+      if (h < 12) return 'শুভ সকাল';
+      if (h < 17) return 'শুভ দুপুর';
+      return 'শুভ সন্ধ্যা';
+    }
     if (h < 12) return 'Good Morning';
     if (h < 17) return 'Good Afternoon';
     return 'Good Evening';
@@ -127,7 +134,7 @@ export default function ShopDashboard() {
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/25"
             style={{ fontWeight: 600 }}
           >
-            <Zap size={15} /> New Sale
+            <Zap size={15} /> {t('add_new')} {t('sales')}
           </Link>
         </div>
       </div>
@@ -135,36 +142,36 @@ export default function ShopDashboard() {
       {/* === TODAY KPIs === */}
       <div className={`grid gap-4 ${isOwnerOrManager ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-2'}`}>
         <KPICard
-          title="Today's Revenue"
+          title={t('revenue')}
           value={formatCurrency(todayStats.totalSales)}
-          subtitle={`${todayStats.totalInvoices} invoices today`}
+          subtitle={`${todayStats.totalInvoices} ${t('invoices')} ${language === 'bn' ? 'আজ' : 'today'}`}
           icon={<ShoppingBag size={20} />}
           color="blue"
           link="/shop/sales"
         />
         {isOwnerOrManager && (
           <KPICard
-            title="Today's Profit"
+            title={t('profit')}
             value={formatCurrency(todayStats.totalProfit)}
-            subtitle="Gross profit"
+            subtitle={language === 'bn' ? 'মোট লাভ' : 'Gross profit'}
             icon={<TrendingUp size={20} />}
             color="green"
           />
         )}
         {isOwnerOrManager && (
           <KPICard
-            title="Today's Expenses"
+            title={t('expenses_today')}
             value={formatCurrency(todayStats.totalExpense)}
-            subtitle="All categories"
+            subtitle={language === 'bn' ? 'সব ক্যাটাগরি' : 'All categories'}
             icon={<Banknote size={20} />}
             color="orange"
             link="/shop/expenses"
           />
         )}
         <KPICard
-          title="Total Invoices"
+          title={t('total_sales')}
           value={sales.filter(s => s.status === 'completed').length.toString()}
-          subtitle="All time completed"
+          subtitle={language === 'bn' ? 'সব সময়ের' : 'All time completed'}
           icon={<FileText size={20} />}
           color="blue"
           link="/shop/sales"
@@ -174,10 +181,10 @@ export default function ShopDashboard() {
       {/* === MONTHLY OVERVIEW (owner/manager only) === */}
       {isOwnerOrManager && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KPICard title="Monthly Revenue" value={formatCurrency(monthStats.totalSales)} subtitle={`${monthStats.count} sales`} icon={<ShoppingBag size={18} />} color="blue" />
-          <KPICard title="Monthly Profit" value={formatCurrency(monthStats.totalProfit)} subtitle="Gross profit" icon={<TrendingUp size={18} />} color="green" />
-          <KPICard title="Stock Value" value={formatCurrency(totalStockValue)} subtitle={`${products.filter(p => p.status === 'active').length} products`} icon={<Package size={18} />} color="blue" link="/shop/inventory" />
-          <KPICard title="Customer Due" value={formatCurrency(totalDue)} subtitle={`${customers.length} customers`} icon={<AlertTriangle size={18} />} color="orange" link="/shop/customers" />
+          <KPICard title={t('monthly_revenue')} value={formatCurrency(monthStats.totalSales)} subtitle={`${monthStats.count} ${t('sales')}`} icon={<ShoppingBag size={18} />} color="blue" />
+          <KPICard title={t('monthly_profit')} value={formatCurrency(monthStats.totalProfit)} subtitle={language === 'bn' ? 'মোট লাভ' : 'Gross profit'} icon={<TrendingUp size={18} />} color="green" />
+          <KPICard title={t('stock_value')} value={formatCurrency(totalStockValue)} subtitle={`${products.filter(p => p.status === 'active').length} ${t('products')}`} icon={<Package size={18} />} color="blue" link="/shop/inventory" />
+          <KPICard title={t('customer_due')} value={formatCurrency(totalDue)} subtitle={`${customers.length} ${t('customers')}`} icon={<AlertTriangle size={18} />} color="orange" link="/shop/customers" />
         </div>
       )}
 
@@ -187,8 +194,8 @@ export default function ShopDashboard() {
         <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-gray-900" style={{ fontWeight: 700 }}>Sales Trend</h3>
-              <p className="text-gray-400 text-xs mt-0.5">Revenue vs Profit over time</p>
+              <h3 className="text-gray-900" style={{ fontWeight: 700 }}>{t('sales_trend')}</h3>
+              <p className="text-gray-400 text-xs mt-0.5">{language === 'bn' ? 'সময়ের সাথে আয় এবং লাভ' : 'Revenue vs Profit over time'}</p>
             </div>
             <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
               {([7, 14, 30] as const).map(d => (
@@ -239,7 +246,7 @@ export default function ShopDashboard() {
         {/* Payment Methods */}
         <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-gray-900" style={{ fontWeight: 700 }}>Payment Methods</h3>
+            <h3 className="text-gray-900" style={{ fontWeight: 700 }}>{t('payment_methods')}</h3>
             <Link to="/shop/reports" className="text-blue-600 text-xs flex items-center gap-1 hover:underline">
               Report <ArrowRight size={11} />
             </Link>
@@ -302,8 +309,8 @@ export default function ShopDashboard() {
         <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-gray-900" style={{ fontWeight: 700 }}>Top Products</h3>
-              <p className="text-gray-400 text-xs mt-0.5">By revenue</p>
+              <h3 className="text-gray-900" style={{ fontWeight: 700 }}>{t('products')}</h3>
+              <p className="text-gray-400 text-xs mt-0.5">{language === 'bn' ? 'আয়ের ভিত্তিতে' : 'By revenue'}</p>
             </div>
             <Link to="/shop/sales" className="text-blue-600 text-xs flex items-center gap-1 hover:underline">View all</Link>
           </div>
@@ -387,7 +394,7 @@ export default function ShopDashboard() {
         <div className="space-y-4">
           {/* Quick actions */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-            <h3 className="text-gray-900 mb-3" style={{ fontWeight: 700 }}>Quick Actions</h3>
+            <h3 className="text-gray-900 mb-3" style={{ fontWeight: 700 }}>{t('quick_actions')}</h3>
             <div className="grid grid-cols-2 gap-2">
               <Link to="/shop/pos" className="flex flex-col items-center gap-2 p-3 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors group">
                 <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
@@ -455,8 +462,8 @@ export default function ShopDashboard() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div>
-            <h3 className="text-gray-900" style={{ fontWeight: 700 }}>Recent Transactions</h3>
-            <p className="text-gray-400 text-xs mt-0.5">Latest {recentSales.length} completed sales</p>
+            <h3 className="text-gray-900" style={{ fontWeight: 700 }}>{t('recent_transactions')}</h3>
+            <p className="text-gray-400 text-xs mt-0.5">{language === 'bn' ? 'সর্বশেষ সম্পন্ন বিক্রয়সমূহ' : `Latest ${recentSales.length} completed sales`}</p>
           </div>
           <Link to="/shop/sales" className="flex items-center gap-1.5 text-blue-600 text-sm hover:underline" style={{ fontWeight: 500 }}>
             View all <ArrowRight size={14} />

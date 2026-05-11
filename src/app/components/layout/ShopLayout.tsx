@@ -11,6 +11,7 @@ import {
 import { notificationStorage } from '../../lib/storage';
 import { Notification } from '../../lib/types';
 import { formatDistanceToNow } from 'date-fns';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface NavItem {
   icon: React.ElementType;
@@ -25,58 +26,59 @@ interface NavGroup {
   items: NavItem[];
 }
 
-const navGroups: NavGroup[] = [
-  {
-    label: 'OVERVIEW',
-    items: [
-      { icon: LayoutDashboard, label: 'Dashboard', to: '/shop', roles: ['owner', 'manager', 'cashier'] },
-    ],
-  },
-  {
-    label: 'SELLING',
-    items: [
-      { icon: ShoppingCart, label: 'POS Billing', to: '/shop/pos', roles: ['owner', 'manager', 'cashier'] },
-      { icon: Layers, label: 'Sales', to: '/shop/sales', roles: ['owner', 'manager', 'cashier'] },
-      { icon: ArrowLeftRight, label: 'Returns', to: '/shop/returns', roles: ['owner', 'manager', 'cashier'] },
-      { icon: UserCheck, label: 'Customers', to: '/shop/customers', roles: ['owner', 'manager', 'cashier'] },
-    ],
-  },
-  {
-    label: 'INVENTORY',
-    items: [
-      { icon: Package, label: 'Products', to: '/shop/products', roles: ['owner', 'manager'] },
-      { icon: Tag, label: 'Categories', to: '/shop/categories', roles: ['owner', 'manager'] },
-      { icon: Bookmark, label: 'Brands', to: '/shop/brands', roles: ['owner', 'manager'] },
-      { icon: Warehouse, label: 'Inventory', to: '/shop/inventory', roles: ['owner', 'manager'] },
-    ],
-  },
-  {
-    label: 'PROCUREMENT',
-    items: [
-      { icon: TruckIcon, label: 'Purchases', to: '/shop/purchases', roles: ['owner', 'manager'] },
-      { icon: Store, label: 'Suppliers', to: '/shop/suppliers', roles: ['owner', 'manager'] },
-    ],
-  },
-  {
-    label: 'FINANCE',
-    items: [
-      { icon: Banknote, label: 'Expenses', to: '/shop/expenses', roles: ['owner', 'manager'] },
-      { icon: Clock, label: 'Registers', to: '/shop/registers', roles: ['owner', 'manager'] },
-      { icon: History, label: 'Audit Logs', to: '/shop/activity-logs', roles: ['owner'] },
-    ],
-  },
-  {
-    label: 'MANAGEMENT',
-    items: [
-      { icon: Users, label: 'Staff', to: '/shop/staff', roles: ['owner'] },
-      { icon: BarChart3, label: 'Reports', to: '/shop/reports', roles: ['owner', 'manager'] },
-      { icon: Settings, label: 'Settings', to: '/shop/settings', roles: ['owner'] },
-    ],
-  },
-];
-
 export default function ShopLayout() {
   const { user, shop, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
+
+  const navGroups: NavGroup[] = [
+    {
+      label: t('dashboard').toUpperCase(),
+      items: [
+        { icon: LayoutDashboard, label: t('dashboard'), to: '/shop', roles: ['owner', 'manager', 'cashier'] },
+      ],
+    },
+    {
+      label: t('sales').toUpperCase(),
+      items: [
+        { icon: ShoppingCart, label: t('pos'), to: '/shop/pos', roles: ['owner', 'manager', 'cashier'] },
+        { icon: Layers, label: t('sales'), to: '/shop/sales', roles: ['owner', 'manager', 'cashier'] },
+        { icon: ArrowLeftRight, label: t('returns'), to: '/shop/returns', roles: ['owner', 'manager', 'cashier'] },
+        { icon: UserCheck, label: t('customers'), to: '/shop/customers', roles: ['owner', 'manager', 'cashier'] },
+      ],
+    },
+    {
+      label: t('inventory').toUpperCase(),
+      items: [
+        { icon: Package, label: t('products'), to: '/shop/products', roles: ['owner', 'manager'] },
+        { icon: Tag, label: t('categories'), to: '/shop/categories', roles: ['owner', 'manager'] },
+        { icon: Bookmark, label: t('brands'), to: '/shop/brands', roles: ['owner', 'manager'] },
+        { icon: Warehouse, label: t('inventory'), to: '/shop/inventory', roles: ['owner', 'manager'] },
+      ],
+    },
+    {
+      label: t('purchases').toUpperCase(),
+      items: [
+        { icon: TruckIcon, label: t('purchases'), to: '/shop/purchases', roles: ['owner', 'manager'] },
+        { icon: Store, label: t('suppliers'), to: '/shop/suppliers', roles: ['owner', 'manager'] },
+      ],
+    },
+    {
+      label: t('expenses').toUpperCase(),
+      items: [
+        { icon: Banknote, label: t('expenses'), to: '/shop/expenses', roles: ['owner', 'manager'] },
+        { icon: Clock, label: t('registers'), to: '/shop/registers', roles: ['owner', 'manager'] },
+        { icon: History, label: t('activity_logs'), to: '/shop/activity-logs', roles: ['owner'] },
+      ],
+    },
+    {
+      label: t('settings').toUpperCase(),
+      items: [
+        { icon: Users, label: t('staff'), to: '/shop/staff', roles: ['owner'] },
+        { icon: BarChart3, label: t('reports'), to: '/shop/reports', roles: ['owner', 'manager'] },
+        { icon: Settings, label: t('settings'), to: '/shop/settings', roles: ['owner'] },
+      ],
+    },
+  ];
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -193,7 +195,7 @@ export default function ShopLayout() {
               style={{ fontWeight: 700 }}
             >
               <Zap size={13} />
-              New Sale
+              {t('pos')}
             </NavLink>
           </div>
         )}
@@ -320,6 +322,17 @@ export default function ShopLayout() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-2">
+            {/* Language Switcher */}
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors bg-white shadow-sm"
+              style={{ fontWeight: 700, fontSize: '11px' }}
+            >
+              <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-gray-100 text-[10px]">
+                {language === 'en' ? '🇺🇸' : '🇧🇩'}
+              </div>
+              <span className="text-gray-700">{language === 'en' ? 'ENGLISH' : 'বাংলা'}</span>
+            </button>
             {/* Subscription badge */}
             {shop && (
               <div className={`hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] ${
