@@ -4,6 +4,8 @@ import { fileURLToPath } from 'url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
+import { VitePWA } from 'vite-plugin-pwa'
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -27,6 +29,43 @@ export default defineConfig({
     // Tailwind is not being actively used – do not remove them
     react(),
     tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        // Ensure the app works offline after a reload
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/api'),
+            handler: 'NetworkOnly', // Data should always be fresh or handled by our custom sync queue
+          },
+          {
+            urlPattern: ({ request }) => request.destination === 'document' || request.destination === 'script' || request.destination === 'style',
+            handler: 'StaleWhileRevalidate',
+          }
+        ]
+      },
+      manifest: {
+        name: 'Rizqara Solution POS',
+        short_name: 'Rizqara POS',
+        description: 'Premium POS Software for Retail Businesses',
+        theme_color: '#4F46E5',
+        background_color: '#ffffff',
+        display: 'standalone',
+        icons: [
+          {
+            src: 'assets/logo.png', // Using the existing logo
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'assets/logo.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
+      }
+    })
   ],
   resolve: {
     alias: {
