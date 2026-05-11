@@ -321,6 +321,24 @@ export default function Login() {
                 </div>
               </button>
             </form>
+
+            {/* Trust badges */}
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mt-8">
+              <div className="flex items-center gap-1.5 text-gray-500 text-[10px] sm:text-[11px] font-medium">
+                <CheckCircle size={13} className="text-green-500" />
+                <span>256-bit SSL Secure</span>
+              </div>
+              <div className="hidden sm:block w-px h-3 bg-gray-200" />
+              <div className="flex items-center gap-1.5 text-gray-500 text-[10px] sm:text-[11px] font-medium">
+                <CheckCircle size={13} className="text-green-500" />
+                <span>GDPR Compliant</span>
+              </div>
+              <div className="hidden sm:block w-px h-3 bg-gray-200" />
+              <div className="flex items-center gap-1.5 text-gray-500 text-[10px] sm:text-[11px] font-medium">
+                <CheckCircle size={13} className="text-green-500" />
+                <span>Data Encrypted</span>
+              </div>
+            </div>
           </div>
 
           {/* Footer */}
