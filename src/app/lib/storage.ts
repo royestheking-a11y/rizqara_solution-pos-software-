@@ -48,7 +48,7 @@ function setAll<T>(key: string, items: T[]): void {
   localStorage.setItem(`rizqara_${key}`, JSON.stringify(items));
 }
 
-function getAuthHeaders() {
+function getAuthHeaders(): Record<string, string> {
   try {
     const saved = localStorage.getItem('rizqara_auth_session');
     if (!saved) return {};
@@ -59,8 +59,8 @@ function getAuthHeaders() {
     const user = users.find((u: any) => u.id === userId);
     if (!user) return {};
     return {
-      'x-user-id': user.id,
-      'x-user-name': user.name
+      'x-user-id': String(user.id),
+      'x-user-name': String(user.name)
     };
   } catch {
     return {};
