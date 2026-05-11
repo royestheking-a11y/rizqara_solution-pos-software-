@@ -3,11 +3,9 @@ import { useNavigate, Link } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import {
   Eye, EyeOff, ShieldCheck, Store, Lock, Users,
-  BarChart3, Package, Zap, ArrowRight, CheckCircle,
-  ShoppingCart, TrendingUp, Globe, Star, ShoppingBag
+  Zap, ArrowRight, CheckCircle,
+  ShoppingBag
 } from 'lucide-react';
-
-const STATS = []; // Removed for UI simplification
 
 /* ─── Premium Splash Screen ─── */
 function SplashScreen({ onDone }: { onDone: () => void }) {
@@ -56,8 +54,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activeTestimonial, setActiveTestimonial] = useState(0);
-  const [showDemoPanel, setShowDemoPanel] = useState(false);
   const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
@@ -66,13 +62,6 @@ export default function Login() {
       else navigate('/shop');
     }
   }, [isAuthenticated, user]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveTestimonial(prev => (prev + 1) % TESTIMONIALS.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,13 +73,6 @@ export default function Login() {
     if (!result.success) {
       setError(result.error || 'Login failed');
     }
-  };
-
-  const setDemo = (acc: typeof DEMO_ACCOUNTS[0]) => {
-    setEmail(acc.email);
-    setPassword(acc.pass);
-    setShowDemoPanel(false);
-    setError('');
   };
 
   return (
@@ -129,14 +111,6 @@ export default function Login() {
           <div className="absolute top-20 right-16 w-32 h-32 rounded-full border border-white/10" />
           <div className="absolute top-24 right-20 w-24 h-24 rounded-full border border-white/5" />
           <div className="absolute bottom-32 left-20 w-20 h-20 rounded-full border border-[#D4A853]/20" />
-
-          {/* Minimal grid */}
-          <div className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: `linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)`,
-              backgroundSize: '60px 60px',
-            }}
-          />
 
           {/* Content */}
           <div className="relative z-10 flex flex-col h-full p-10 xl:p-14">
@@ -177,32 +151,6 @@ export default function Login() {
                 Elevate your business with our enterprise-grade POS system. 
                 Seamlessly manage inventory, sales, and analytics with ease.
               </p>
-            </div>
-
-            {/* Testimonial rotator */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-              <div className="flex gap-1 mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={12} className="text-[#D4A853] fill-[#D4A853]" />
-                ))}
-              </div>
-              <div className="transition-all duration-500">
-                <p className="text-slate-300 text-sm leading-relaxed mb-3 font-medium">
-                  {TESTIMONIALS[activeTestimonial].text}
-                </p>
-                <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest">
-                  {TESTIMONIALS[activeTestimonial].author}
-                </p>
-              </div>
-              <div className="flex gap-1.5 mt-4">
-                {TESTIMONIALS.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveTestimonial(i)}
-                    className={`h-1 rounded-full transition-all duration-300 ${i === activeTestimonial ? 'bg-indigo-500 w-8' : 'bg-white/10 w-2'}`}
-                  />
-                ))}
-              </div>
             </div>
 
             {/* Footer */}
@@ -333,13 +281,11 @@ export default function Login() {
                 </div>
               </button>
             </form>
-
-            </div>
           </div>
 
           {/* Footer */}
-          <div className="px-8 py-5 border-t border-gray-100">
-            <div className="flex items-center justify-between max-w-xl mx-auto">
+          <div className="px-8 py-5 border-t border-gray-100 mt-auto">
+            <div className="flex items-center justify-between max-w-xl mx-auto w-full">
               <div className="text-gray-400 text-xs">
                 © 2026 <a href="https://www.rizqara.tech" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">Rizqara</a> Solution
               </div>
